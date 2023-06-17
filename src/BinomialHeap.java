@@ -183,7 +183,7 @@ public class BinomialHeap
             HeapNode x = head; // head of the heap
             HeapNode next_x = x.next; // next of head
             HeapNode prev_x = null; // prev of head
-            while(next_x != head) // continue the loop while next isn't this first again
+            while(next_x != head && x != this.last) // continue the loop while next isn't this first again and x has reached last
             {
                 // if the rank current is smaller than next one or the rank of x is not the same as the rank of the next of next
                 // then we can skip because there is no linking to be done
