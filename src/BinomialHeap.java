@@ -41,7 +41,12 @@ public class BinomialHeap
         inserted_as_heap.size = 1;
         if(this.size % 2 == 0) // inserting to even size means new root as last with O(1) work
         {
-            this.merge(inserted_as_heap);
+            HeapNode prev_last_next = this.last.next;
+
+            this.last.next = inserted_node; // the inserted node will be head
+            inserted_node.next = prev_last_next; // connecting the head to the next of previous last
+            this.size+=1;
+            this.num_of_trees += 1;
         }
         else
         {
@@ -92,9 +97,11 @@ public class BinomialHeap
     {
         return; // should be replaced by student code
     }
-    private void link(HeapNode x, HeapNode y)
+    private void link(HeapNode x, HeapNode y) // linking x to y such that y is parent of x
     {
         x.setParent(y);
+        if(x == this.last) // changing last position
+            this.last = y;
         if(y.child != null) // y has at least one child
         {
             x.next = y.child.next;
@@ -127,8 +134,9 @@ public class BinomialHeap
         while (true){
             if(trees1 == 0) // if we exhausted the trees meaning we inserted everything from this
             {
+                if(this.last.rank <= h2.last.rank)
+                    this.last = h2.last;
                 tail.next = head_2;
-                this.last = h2.last; // h2 still has more nodes which means it has the correct last
                 break;
             }
             if(trees2 == 0)
@@ -136,7 +144,7 @@ public class BinomialHeap
                 tail.next = head_1;
                 break;
             }
-            if(head_1.item.key <= head_2.item.key)
+            if(head_1.item.key <= head_2.item.key) // inserting the bigger node so last will be minimal
             {
                 tail.next = head_1;
                 head_1 = head_1.next;
@@ -150,9 +158,11 @@ public class BinomialHeap
             }
             tail = tail.next;
         }
-        this.last.next = dummy.next; // connecting last with head
+        this.last.next = dummy.next; // connecting current last to the head
         return dummy.next; // the head
+
     }
+
     /**
      *
      * Meld the heap with heap2
@@ -169,7 +179,7 @@ public class BinomialHeap
         }
         else {
             HeapNode head;
-            head= merge(heap2);
+            head = merge(heap2);
             HeapNode x = head; // head of the heap
             HeapNode next_x = x.next; // next of head
             HeapNode prev_x = null; // prev of head
@@ -192,6 +202,7 @@ public class BinomialHeap
                     if (prev_x == null) // meaning next-x root is smaller than x so we need to switch places of head
                     {
                         this.last.next = next_x;
+                        head = next_x;
                     }
                     else
                     {
@@ -201,7 +212,7 @@ public class BinomialHeap
                     this.num_of_trees -= 1;
                     x = next_x;
                 }
-                next_x = next_x.next;
+                next_x = x.next;
             }
         }
     }
