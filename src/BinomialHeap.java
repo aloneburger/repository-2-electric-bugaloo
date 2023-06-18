@@ -1,3 +1,6 @@
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * BinomialHeap
  *
@@ -16,6 +19,11 @@ public class BinomialHeap
         this.size = 0;
         this.last = last;
         this.min = min;
+        this.num_of_trees = 0;
+    }
+    public BinomialHeap()
+    {
+        this.size = 0;
         this.num_of_trees = 0;
     }
 
@@ -39,15 +47,23 @@ public class BinomialHeap
         BinomialHeap inserted_as_heap = new BinomialHeap(inserted_node, inserted_node);
         inserted_as_heap.num_of_trees = 1;
         inserted_as_heap.size = 1;
-        if(this.size % 2 == 0) // inserting to even size means new root as last with O(1) work
+        if(this.size == 0)
         {
-            HeapNode prev_last_next = this.last.next;
-
-            this.last.next = inserted_node; // the inserted node will be head
-            inserted_node.next = prev_last_next; // connecting the head to the next of previous last
-            this.size+=1;
-            this.num_of_trees += 1;
+            this.last = inserted_node;
+            this.min = inserted_node;
+            this.num_of_trees = 1;
+            this.size = 1;
         }
+
+        else
+            if(this.size % 2 == 0) // inserting to even size means new root as last with O(1) work
+            {
+                HeapNode prev_head = this.last.next;
+                this.last.next = inserted_node; // the inserted node will be head
+                inserted_node.next = prev_head; // connecting the new head to the last head
+                this.size+=1;
+                this.num_of_trees += 1;
+            }
         else
         {
             this.meld(inserted_as_heap);
@@ -107,7 +123,13 @@ public class BinomialHeap
             x.next = y.child.next;
             y.child.next = x;
         }
+        else // if x is going to be the only child then it's next will be itself
+        {
+            x.next = x;
+        }
         y.child = x;
+
+
         y.rank+=1;
     }
     private HeapNode merge(BinomialHeap this, BinomialHeap h2)
@@ -144,7 +166,7 @@ public class BinomialHeap
                 tail.next = head_1;
                 break;
             }
-            if(head_1.item.key <= head_2.item.key) // inserting the bigger node so last will be minimal
+            if(head_1.rank <= head_2.rank) // merging in rank-order
             {
                 tail.next = head_1;
                 head_1 = head_1.next;
@@ -183,7 +205,7 @@ public class BinomialHeap
             HeapNode x = head; // head of the heap
             HeapNode next_x = x.next; // next of head
             HeapNode prev_x = null; // prev of head
-            while(next_x != head && x != this.last) // continue the loop while next isn't this first again and x has reached last
+            while(x != last) // continue the loop while next isn't this first again and x has reached last
             {
                 // if the rank current is smaller than next one or the rank of x is not the same as the rank of the next of next
                 // then we can skip because there is no linking to be done
@@ -354,22 +376,48 @@ public class BinomialHeap
         }
     }
     public class Test{
-        public void test()
-        {
-            HeapItem first = new HeapItem(new HeapNode(), 1, "lol");
-            HeapNode first_node = new HeapNode();
-            first_node.next = first_node;
-            first_node.rank = 0;
-            first_node.item = first;
-            HeapItem second = new HeapItem(new HeapNode(), 2, "lol");
-            HeapNode second_node = new HeapNode();
-            second_node.next = second_node;
-            second_node.rank = 0;
-            second_node.item = second;
-            BinomialHeap h1 = new BinomialHeap(first_node, first_node);
-            h1.insert(2, "lol");
+        public static void print(BinomialHeap h) {
+            System.out.println("Binomial Heap:");
+            System.out.println("Size: " + h.size);
 
+            if (h.min != null) {
+                System.out.println("Minimum Node: " + h.min.item.key);
+            } else {
+                System.out.println("No minimum node.");
+            }
+
+            System.out.println("Heap Nodes:");
+            if (h.last != null) {
+                Set<HeapNode> visited = new HashSet<>();
+                printHeapNode(h.last, 0, visited);
+            } else {
+                System.out.println("No heap nodes.");
+            }
         }
+
+    private static void printHeapNode(HeapNode node, int indentLevel, Set<HeapNode> visited) {
+        StringBuilder indent = new StringBuilder();
+        for (int i = 0; i < indentLevel; i++) {
+            indent.append("    ");
+        }
+
+        System.out.println(indent + "Key: " + node.item.key);
+        System.out.println(indent + "Info: " + node.item.info);
+        System.out.println(indent + "Rank: " + node.rank);
+
+        visited.add(node);
+
+        if (node.child != null && !visited.contains(node.child)) {
+            System.out.println(indent + "Child:");
+            printHeapNode(node.child, indentLevel + 1, visited);
+        }
+
+        if (node.next != null && !visited.contains(node.next)) {
+            System.out.println(indent + "Sibling:");
+            printHeapNode(node.next, indentLevel, visited);
+        }
+    }
+
     }
 
 
