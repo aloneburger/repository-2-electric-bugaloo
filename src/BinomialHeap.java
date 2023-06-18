@@ -47,16 +47,15 @@ public class BinomialHeap
         BinomialHeap inserted_as_heap = new BinomialHeap(inserted_node, inserted_node);
         inserted_as_heap.num_of_trees = 1;
         inserted_as_heap.size = 1;
-        if(this.size == 0)
+        if(this.size == 0) // if there are no elements yet we insert the first one which will be last + min
         {
             this.last = inserted_node;
             this.min = inserted_node;
             this.num_of_trees = 1;
             this.size = 1;
         }
-
         else
-            if(this.size % 2 == 0) // inserting to even size means new root as last with O(1) work
+            if(this.size % 2 == 0) // inserting to even size means new root as head with O(1) work
             {
                 HeapNode prev_head = this.last.next;
                 this.last.next = inserted_node; // the inserted node will be head
@@ -132,9 +131,9 @@ public class BinomialHeap
 
         y.rank+=1;
     }
-    private HeapNode merge(BinomialHeap this, BinomialHeap h2)
+    private HeapNode merge(BinomialHeap h2) // making a new linked lists rank ordered before the linking
     {
-        HeapNode dummy = new HeapNode();
+        HeapNode dummy = new HeapNode(); // initiating a dummy such that next will be the start of the list
 
         HeapNode tail = dummy;
         if(this.empty())
@@ -154,7 +153,7 @@ public class BinomialHeap
         HeapNode head_1 = this.last.next;
         HeapNode head_2 = h2.last.next;
         while (true){
-            if(trees1 == 0) // if we exhausted the trees meaning we inserted everything from this
+            if(trees1 == 0) // if we exhausted the trees meaning we inserted everything from this tree/heap
             {
                 if(this.last.rank <= h2.last.rank)
                     this.last = h2.last;
@@ -180,8 +179,8 @@ public class BinomialHeap
             }
             tail = tail.next;
         }
-        this.last.next = dummy.next; // connecting current last to the head
-        return dummy.next; // the head
+        this.last.next = dummy.next; // connecting current last to the head (might change later)
+        return dummy.next; // returning the head of the list of roots
 
     }
 
@@ -192,7 +191,7 @@ public class BinomialHeap
      */
     public void meld(BinomialHeap heap2)
     {
-        if(this.empty())
+        if(this.empty()) // if we try to meld when this is empty we will get heap 2 as this meaning we need to assign fields
         {
             this.last = heap2.last;
             this.size = heap2.size;
@@ -201,13 +200,13 @@ public class BinomialHeap
         }
         else {
             HeapNode head;
-            head = merge(heap2);
+            head = merge(heap2); // getting merged list in rank-order before actually linking
             HeapNode x = head; // head of the heap
             HeapNode next_x = x.next; // next of head
             HeapNode prev_x = null; // prev of head
             while(x != last) // continue the loop while next isn't this first again and x has reached last
             {
-                // if the rank current is smaller than next one or the rank of x is not the same as the rank of the next of next
+                // if the rank of current root is smaller than next one or we have 3 roots with same rank
                 // then we can skip because there is no linking to be done
                 if((x.rank != next_x.rank) || ((next_x.next != head) && (next_x.next.rank == x.rank)))
                 {
@@ -224,15 +223,15 @@ public class BinomialHeap
                     if (prev_x == null) // meaning next-x root is smaller than x so we need to switch places of head
                     {
                         this.last.next = next_x;
-                        head = next_x;
+                        head = next_x; // we need to assign new head in-order to pass new information into first condition
                     }
                     else
                     {
-                        prev_x.next = next_x;
+                        prev_x.next = next_x; // x has key bigger than next, meaning x is no longer root so next is after prev
                     }
                     link(x, next_x);
                     this.num_of_trees -= 1;
-                    x = next_x;
+                    x = next_x; // after finishing the link we can assign x to be next_x since its the current root after linking
                 }
                 next_x = x.next;
             }

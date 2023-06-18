@@ -9,6 +9,7 @@ public class Main {
         h1.insert(3, "l");
         h1.insert(1, "sd");
         h1.insert(6, "d");
+        h1.insert(7, "s");
         BinomialHeap.Test.print(h1);
 
     }
