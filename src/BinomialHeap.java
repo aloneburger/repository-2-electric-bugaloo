@@ -62,6 +62,8 @@ public class BinomialHeap
                 inserted_node.next = prev_head; // connecting the new head to the last head
                 this.size+=1;
                 this.num_of_trees += 1;
+                if(inserted.key < this.min.item.key)
+                    this.min = this.last.next; // meaning the head will also be minimum
             }
         else
         {
@@ -88,7 +90,9 @@ public class BinomialHeap
      */
     public HeapItem findMin()
     {
-        return null; // should be replaced by student code
+        if(this.empty())
+            return null;
+        return this.min.item;
     }
 
     /**
@@ -134,18 +138,13 @@ public class BinomialHeap
     private HeapNode merge(BinomialHeap h2) // making a new linked lists rank ordered before the linking
     {
         HeapNode dummy = new HeapNode(); // initiating a dummy such that next will be the start of the list
-
         HeapNode tail = dummy;
-        if(this.empty())
-        {
-            this.num_of_trees += h2.num_of_trees;
-            this.size += h2.size;
-            return h2.last.next;
-        }
         if(h2.empty())
         {
             return this.last.next;
         }
+        int min1 = this.min.item.key;
+        int min2 = h2.min.item.key;
         int trees1 = this.num_of_trees;
         int trees2 = h2.num_of_trees;
         this.num_of_trees = this.num_of_trees + h2.num_of_trees; // upper bound for num of trees
@@ -183,6 +182,25 @@ public class BinomialHeap
         return dummy.next; // returning the head of the list of roots
 
     }
+    private void update_min_pointer()
+    {
+        HeapNode x = this.last.next;
+        int min_val = Integer.MAX_VALUE;
+        if(x.next == this.last.next) // meaning num of trees is 1
+            if(x.item.key < this.min.item.key)
+                this.min = x;
+        int trees = num_of_trees;
+        while(trees > 0)
+        {
+            if(x.item.key < min_val)
+            {
+                min_val = x.item.key;
+                this.min = x;
+            }
+            x = x.next;
+            trees-=1;
+        }
+    }
 
     /**
      *
@@ -197,8 +215,8 @@ public class BinomialHeap
             this.size = heap2.size;
             this.num_of_trees = heap2.num_of_trees;
             this.min = heap2.min;
-        }
-        else {
+        } else if (heap2.empty()) {
+        } else {
             HeapNode head;
             head = merge(heap2); // getting merged list in rank-order before actually linking
             HeapNode x = head; // head of the heap
@@ -235,6 +253,7 @@ public class BinomialHeap
                 }
                 next_x = x.next;
             }
+            update_min_pointer();
         }
     }
 
