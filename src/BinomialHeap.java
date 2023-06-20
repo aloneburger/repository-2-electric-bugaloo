@@ -44,6 +44,7 @@ public class BinomialHeap
         HeapItem inserted = new HeapItem(new HeapNode(), key, info);
         HeapNode inserted_node = new HeapNode(inserted, null, null, null, 0);
         inserted_node.next = inserted_node;
+        inserted_node.item.node = inserted_node;
         BinomialHeap inserted_as_heap = new BinomialHeap(inserted_node, inserted_node);
         inserted_as_heap.num_of_trees = 1;
         inserted_as_heap.size = 1;
@@ -264,7 +265,7 @@ public class BinomialHeap
      */
     public int size()
     {
-        return 42; // should be replaced by student code
+        return this.size;
     }
 
     /**
@@ -285,7 +286,7 @@ public class BinomialHeap
      */
     public int numTrees()
     {
-        return 0; // should be replaced by student code
+        return this.num_of_trees;
     }
 
 
@@ -293,7 +294,7 @@ public class BinomialHeap
      * Class implementing a node in a Binomial Heap.
      *
      */
-    public static class HeapNode{
+    public class HeapNode{
 
 
         public HeapItem item;
@@ -358,7 +359,7 @@ public class BinomialHeap
      * Class implementing an item in a Binomial Heap.
      *
      */
-    public static class HeapItem{
+    public class HeapItem{
         public HeapNode node;
         public int key;
         public String info;
