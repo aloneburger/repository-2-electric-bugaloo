@@ -311,7 +311,6 @@ public class BinomialHeap
             this.rank = rank;
         }
         public HeapNode() {
-
         }
 
         public HeapItem getItem() {
