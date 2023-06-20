@@ -293,7 +293,7 @@ public class BinomialHeap
      * Class implementing a node in a Binomial Heap.
      *
      */
-    public static class HeapNode{
+    public class HeapNode{
 
 
         public HeapItem item;
@@ -358,7 +358,7 @@ public class BinomialHeap
      * Class implementing an item in a Binomial Heap.
      *
      */
-    public static class HeapItem{
+    public class HeapItem{
         public HeapNode node;
         public int key;
         public String info;
