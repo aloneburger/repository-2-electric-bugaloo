@@ -301,18 +301,29 @@ public class BinomialHeap
      * Meld the heap with heap2
      *
      */
-    public void meld(BinomialHeap heap2)
+   public void meld(BinomialHeap heap2)
     {
+        boolean is_insert = false;
         if(this.empty()) // if we try to meld when this is empty we will get heap 2 as this meaning we need to assign fields
         {
             this.last = heap2.last;
             this.size = heap2.size;
             this.num_of_trees = heap2.num_of_trees;
             this.min = heap2.min;
-        } else if (heap2.empty()) {
-        } else {
+        }
+        else if(!heap2.empty()){
             HeapNode head;
-            head = merge(heap2); // getting merged list in rank-order before actually linking
+            if(heap2.size() == 1)
+            {
+                this.num_of_trees+=1;//update upper bound for num of trees
+                is_insert = true; // if we are inserting one element, we save it as a flag for later
+                head = heap2.last; // new head will be the heap2's only element
+                head.next = this.last.next;
+                this.last.next = head;
+                this.size++;
+            }
+            else
+                head = merge(heap2); // getting merged list in rank-order before actually linking
             HeapNode x = head; // head of the heap
             HeapNode next_x = x.next; // next of head
             HeapNode prev_x = null; // prev of head
@@ -322,6 +333,8 @@ public class BinomialHeap
                 // then we can skip because there is no linking to be done
                 if((x.rank != next_x.rank) || ((next_x.next != head) && (next_x.next.rank == x.rank)))
                 {
+                    if(is_insert)
+                        break;
                     prev_x = x;
                     x = next_x;
                 } else if (x.item.key <= next_x.item.key)
@@ -350,6 +363,8 @@ public class BinomialHeap
             update_min_pointer();
         }
     }
+
+    
 
     /**
      *
