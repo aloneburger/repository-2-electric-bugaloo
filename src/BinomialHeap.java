@@ -329,6 +329,8 @@ public class BinomialHeap
             HeapNode prev_x = null; // prev of head
             while(x != last) // continue the loop while next isn't this first again and x has reached last
             {
+                if(x.item.key < this.min.item.key)
+                    this.min = x;
                 // if the rank of current root is smaller than next one or we have 3 roots with same rank
                 // then we can skip because there is no linking to be done
                 if((x.rank != next_x.rank) || ((next_x.next != head) && (next_x.next.rank == x.rank)))
@@ -360,7 +362,7 @@ public class BinomialHeap
                 }
                 next_x = x.next;
             }
-            update_min_pointer();
+            //update_min_pointer();
         }
     }
 
