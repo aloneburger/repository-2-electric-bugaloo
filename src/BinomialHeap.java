@@ -1,3 +1,5 @@
+import com.sun.source.tree.WhileLoopTree;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,6 +27,13 @@ public class BinomialHeap
     {
         this.size = 0;
         this.num_of_trees = 0;
+    }
+    public BinomialHeap(HeapNode last, HeapNode min, int size, int num_of_trees)
+    {
+        this.min = min;
+        this.size = size;
+        this.num_of_trees = num_of_trees;
+        this.last = last;
     }
 
 
@@ -56,16 +65,16 @@ public class BinomialHeap
             this.size = 1;
         }
         else
-            if(this.size % 2 == 0) // inserting to even size means new root as head with O(1) work
-            {
-                HeapNode prev_head = this.last.next;
-                this.last.next = inserted_node; // the inserted node will be head
-                inserted_node.next = prev_head; // connecting the new head to the last head
-                this.size+=1;
-                this.num_of_trees += 1;
-                if(inserted.key < this.min.item.key)
-                    this.min = this.last.next; // meaning the head will also be minimum
-            }
+        if(this.size % 2 == 0) // inserting to even size means new root as head with O(1) work
+        {
+            HeapNode prev_head = this.last.next;
+            this.last.next = inserted_node; // the inserted node will be head
+            inserted_node.next = prev_head; // connecting the new head to the last head
+            this.size+=1;
+            this.num_of_trees += 1;
+            if(inserted.key < this.min.item.key)
+                this.min = this.last.next; // meaning the head will also be minimum
+        }
         else
         {
             this.meld(inserted_as_heap);
@@ -80,9 +89,77 @@ public class BinomialHeap
      */
     public void deleteMin()
     {
-        return; // should be replaced by student code
+        HeapNode node = this.min;
+        int size_of_subHeap = (int)Math.pow(2, node.rank) - 1;
+        int num_of_subHeap_trees = node.rank;
+        unlink(node);
+        if (size_of_subHeap != 0) {
+            node = node.child;
+            node.parent = null;
+            HeapNode newLast = node;
+            HeapNode newMin = node;
+            HeapNode passerby = node.next;
+            while (!passerby.equals(node)) {
+                if (passerby.item.key < newMin.item.key) {
+                    newMin = passerby;
+                }
+                passerby.parent = null;
+                passerby = passerby.next;
+            }
+            BinomialHeap meldable = new BinomialHeap(newLast, newMin, size_of_subHeap, num_of_subHeap_trees);
+            this.meld(meldable);
+        }
+        else if (this.size != 0){
+            HeapNode newMin = this.last;
+            HeapNode passerby = this.last.next;
+            HeapNode scanHelper = this.last;
+            while (!passerby.equals(scanHelper))
+            {
+                if (passerby.item.key < newMin.item.key)
+                    newMin = passerby;
+                passerby = passerby.next;
+            }
+        }
+    }
+    //removes node from the heap, including its subtree.
+    //assuming that unlink is used only on roots of binary trees.
+    public void unlink(HeapNode node)
+    {
+        HeapNode nextNode = node.next;
+        HeapNode passerBy = node.next;
+        HeapNode newMin = nextNode;
+        int nodes_removed = (int)Math.pow(2, node.rank);
+        if(this.num_of_trees > 1) {
+            while (!passerBy.equals(node)) {
+                passerBy.parent = null;
+                if (newMin.item.key > passerBy.item.key) {
+                    newMin = passerBy;
+                }
+                if (passerBy.next.equals(node)) {
+                    passerBy.next = nextNode;
+                    break;
+                }
+                passerBy = passerBy.next;
+            }
+            if(this.last.equals(node))
+            {
+                this.last = passerBy;
+            }
+            node.next = null;
+            this.min = newMin;
+            num_of_trees -= 1;
+            this.size -= nodes_removed;
+        }
+        else
+        {
+            this.num_of_trees = 0;
+            this.size = 0;
+            this.min = null;
+            this.last = null;
+        }
 
     }
+
 
     /**
      *
@@ -105,9 +182,24 @@ public class BinomialHeap
      */
     public void decreaseKey(HeapItem item, int diff)
     {
-        return; // should be replaced by student code
+        item.setKey(item.getKey() - diff);
+        while (item.node.has_parent() && item.key < item.node.parent.item.key)
+        {
+            swap(item, item.node.parent.item);
+        }
+        if (item.key < this.findMin().key)
+            this.min = item.node;
     }
 
+    //swaps two items in a tree
+    private void swap(HeapItem a, HeapItem b)
+    {
+        HeapNode temp = a.getNode();
+        a.node = b.node;
+        b.node = temp;
+        a.node.item = a;
+        b.node.item = b;
+    }
     /**
      *
      * Delete the item from the heap.
@@ -115,7 +207,8 @@ public class BinomialHeap
      */
     public void delete(HeapItem item)
     {
-        return; // should be replaced by student code
+        decreaseKey(item, Integer.MAX_VALUE);
+        deleteMin();
     }
     private void link(HeapNode x, HeapNode y) // linking x to y such that y is parent of x
     {
@@ -352,6 +445,15 @@ public class BinomialHeap
         public void setRank(int rank) {
             this.rank = rank;
         }
+
+        public boolean has_parent()
+        {
+            return this.parent != null;
+        }
+
+        /**
+         * @pre: Node is a root of a legal binary tree
+         */
     }
 
     /**
@@ -413,28 +515,28 @@ public class BinomialHeap
             }
         }
 
-    private static void printHeapNode(HeapNode node, int indentLevel, Set<HeapNode> visited) {
-        StringBuilder indent = new StringBuilder();
-        for (int i = 0; i < indentLevel; i++) {
-            indent.append("    ");
+        private static void printHeapNode(HeapNode node, int indentLevel, Set<HeapNode> visited) {
+            StringBuilder indent = new StringBuilder();
+            for (int i = 0; i < indentLevel; i++) {
+                indent.append("    ");
+            }
+
+            System.out.println(indent + "Key: " + node.item.key);
+            System.out.println(indent + "Info: " + node.item.info);
+            System.out.println(indent + "Rank: " + node.rank);
+
+            visited.add(node);
+
+            if (node.child != null && !visited.contains(node.child)) {
+                System.out.println(indent + "Child:");
+                printHeapNode(node.child, indentLevel + 1, visited);
+            }
+
+            if (node.next != null && !visited.contains(node.next)) {
+                System.out.println(indent + "Sibling:");
+                printHeapNode(node.next, indentLevel, visited);
+            }
         }
-
-        System.out.println(indent + "Key: " + node.item.key);
-        System.out.println(indent + "Info: " + node.item.info);
-        System.out.println(indent + "Rank: " + node.rank);
-
-        visited.add(node);
-
-        if (node.child != null && !visited.contains(node.child)) {
-            System.out.println(indent + "Child:");
-            printHeapNode(node.child, indentLevel + 1, visited);
-        }
-
-        if (node.next != null && !visited.contains(node.next)) {
-            System.out.println(indent + "Sibling:");
-            printHeapNode(node.next, indentLevel, visited);
-        }
-    }
 
     }
 
