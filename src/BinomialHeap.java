@@ -1,8 +1,3 @@
-import com.sun.source.tree.WhileLoopTree;
-
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * BinomialHeap
  *
@@ -301,7 +296,7 @@ public class BinomialHeap
      * Meld the heap with heap2
      *
      */
-   public void meld(BinomialHeap heap2)
+    public void meld(BinomialHeap heap2)
     {
         boolean is_insert = false;
         if(this.empty()) // if we try to meld when this is empty we will get heap 2 as this meaning we need to assign fields
@@ -321,6 +316,8 @@ public class BinomialHeap
                 head.next = this.last.next;
                 this.last.next = head;
                 this.size++;
+                if(head.item.key < this.min.item.key)
+                    this.min = head;
             }
             else
                 head = merge(heap2); // getting merged list in rank-order before actually linking
@@ -329,8 +326,6 @@ public class BinomialHeap
             HeapNode prev_x = null; // prev of head
             while(x != last) // continue the loop while next isn't this first again and x has reached last
             {
-                if(x.item.key < this.min.item.key)
-                    this.min = x;
                 // if the rank of current root is smaller than next one or we have 3 roots with same rank
                 // then we can skip because there is no linking to be done
                 if((x.rank != next_x.rank) || ((next_x.next != head) && (next_x.next.rank == x.rank)))
@@ -362,11 +357,12 @@ public class BinomialHeap
                 }
                 next_x = x.next;
             }
-            //update_min_pointer();
+            if(!is_insert) // we already updated the min so we need to recheck min only in regular melding
+                update_min_pointer();
         }
     }
 
-    
+
 
     /**
      *
@@ -512,52 +508,4 @@ public class BinomialHeap
             this.info = info;
         }
     }
-    public class Test{
-        public static void print(BinomialHeap h) {
-            System.out.println("Binomial Heap:");
-            System.out.println("Size: " + h.size);
-
-            if (h.min != null) {
-                System.out.println("Minimum Node: " + h.min.item.key);
-            } else {
-                System.out.println("No minimum node.");
-            }
-
-            System.out.println("Heap Nodes:");
-            if (h.last != null) {
-                Set<HeapNode> visited = new HashSet<>();
-                printHeapNode(h.last, 0, visited);
-            } else {
-                System.out.println("No heap nodes.");
-            }
-        }
-
-        private static void printHeapNode(HeapNode node, int indentLevel, Set<HeapNode> visited) {
-            StringBuilder indent = new StringBuilder();
-            for (int i = 0; i < indentLevel; i++) {
-                indent.append("    ");
-            }
-
-            System.out.println(indent + "Key: " + node.item.key);
-            System.out.println(indent + "Info: " + node.item.info);
-            System.out.println(indent + "Rank: " + node.rank);
-
-            visited.add(node);
-
-            if (node.child != null && !visited.contains(node.child)) {
-                System.out.println(indent + "Child:");
-                printHeapNode(node.child, indentLevel + 1, visited);
-            }
-
-            if (node.next != null && !visited.contains(node.next)) {
-                System.out.println(indent + "Sibling:");
-                printHeapNode(node.next, indentLevel, visited);
-            }
-        }
-
-    }
-
-
-
-
 }
